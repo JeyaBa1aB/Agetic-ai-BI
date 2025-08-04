@@ -1,0 +1,23 @@
+# Flask Web Framework
+Flask==2.3.2
+Flask-CORS==4.0.0
+Flask-SocketIO==5.3.4
+
+# Environment Configuration
+python-dotenv==1.0.0
+
+# Multi-Agent AI Framework
+crewai
+
+# Supabase Database
+supabase
+
+# Data Processing
+pandas
+numpy
+
+# HTTP Requests (for API calls)
+requests
+
+# JSON handling and utilities
+jsonschema

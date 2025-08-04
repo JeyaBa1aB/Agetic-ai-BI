@@ -1,0 +1,101 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+@layer base {
+  * {
+    @apply border-gray-200;
+  }
+  
+  body {
+    @apply bg-background-primary text-gray-900 font-sans;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+  
+  #root {
+    @apply min-h-screen;
+  }
+}
+
+@layer components {
+  /* Agent status indicators */
+  .agent-status-ready {
+    @apply bg-status-ready text-white;
+  }
+  
+  .agent-status-working {
+    @apply bg-status-working text-white animate-pulse;
+  }
+  
+  .agent-status-completed {
+    @apply bg-status-completed text-white;
+  }
+  
+  .agent-status-error {
+    @apply bg-status-error text-white;
+  }
+  
+  .agent-status-idle {
+    @apply bg-status-idle text-white;
+  }
+  
+  /* Agent cards */
+  .agent-card {
+    @apply bg-background-card rounded-lg shadow-agent hover:shadow-agent-hover transition-all duration-200 border border-gray-200;
+  }
+  
+  /* Chat interface */
+  .chat-message {
+    @apply rounded-lg p-3 max-w-xs break-words;
+  }
+  
+  .chat-message-user {
+    @apply bg-blue-500 text-white ml-auto;
+  }
+  
+  .chat-message-agent {
+    @apply bg-gray-100 text-gray-900 mr-auto;
+  }
+  
+  /* File upload */
+  .file-upload-zone {
+    @apply border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-400 transition-colors duration-200;
+  }
+  
+  .file-upload-zone.dragover {
+    @apply border-blue-500 bg-blue-50;
+  }
+  
+  /* Progress bars */
+  .progress-bar {
+    @apply w-full bg-gray-200 rounded-full h-2;
+  }
+  
+  .progress-fill {
+    @apply bg-blue-500 h-2 rounded-full transition-all duration-300 ease-out;
+  }
+  
+  /* Buttons */
+  .btn-primary {
+    @apply bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2;
+  }
+  
+  .btn-secondary {
+    @apply bg-gray-100 hover:bg-gray-200 text-gray-900 font-medium py-2 px-4 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2;
+  }
+  
+  /* Loading animations */
+  .loading-dots::after {
+    content: '';
+    animation: loading-dots 1.5s infinite;
+  }
+  
+  @keyframes loading-dots {
+    0%, 20% { content: ''; }
+    40% { content: '.'; }
+    60% { content: '..'; }
+    80%, 100% { content: '...'; }
+  }
+}
