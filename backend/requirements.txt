@@ -9,6 +9,11 @@ python-dotenv==1.0.0
 # Multi-Agent AI Framework
 crewai
 
+# LLM Integration
+litellm
+langchain-google-genai
+langchain-openai
+
 # Supabase Database
 supabase
 

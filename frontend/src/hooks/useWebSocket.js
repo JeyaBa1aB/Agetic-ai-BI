@@ -157,13 +157,21 @@ export const useWebSocket = (autoConnect = true) => {
     };
   }, [autoConnect, connect, disconnect]);
 
-  // Periodic connection check
+  // Periodic connection check and heartbeat
   useEffect(() => {
     if (!isConnected) return;
 
     const interval = setInterval(() => {
       ping();
-    }, 30000); // Ping every 30 seconds
+      
+      // Send heartbeat if we have an active session
+      if (websocketService.socket && websocketService.socket.connected) {
+        websocketService.socket.emit('heartbeat', {
+          session_id: 'keepalive',
+          timestamp: Date.now()
+        });
+      }
+    }, 20000); // Ping every 20 seconds (less than the 25s ping interval)
 
     return () => clearInterval(interval);
   }, [isConnected, ping]);

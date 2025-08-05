@@ -32,8 +32,16 @@ cors_origins = os.getenv('CORS_ORIGINS', 'http://localhost:3000,http://localhost
 # Enable CORS for cross-origin requests from React frontend
 CORS(app, origins=cors_origins)
 
-# Initialize SocketIO for real-time communication
-socketio = SocketIO(app, cors_allowed_origins=cors_origins)
+# Initialize SocketIO for real-time communication with extended timeouts for long-running analysis
+socketio = SocketIO(
+    app, 
+    cors_allowed_origins=cors_origins,
+    ping_timeout=60,      # 60 seconds ping timeout
+    ping_interval=25,     # 25 seconds ping interval
+    max_http_buffer_size=100000000,  # 100MB for large data transfers
+    logger=True,
+    engineio_logger=True
+)
 
 # Initialize Supabase
 try:
@@ -275,6 +283,16 @@ def handle_get_all_sessions():
 def handle_ping():
     """Handle ping for connection testing"""
     emit('pong', {'timestamp': time.time()})
+
+@socketio.on('heartbeat')
+def handle_heartbeat(data):
+    """Handle heartbeat to keep connection alive during long analysis"""
+    session_id = data.get('session_id')
+    emit('heartbeat_response', {
+        'session_id': session_id,
+        'timestamp': time.time(),
+        'status': 'alive'
+    })
 
 if __name__ == '__main__':
     # Get server configuration from environment

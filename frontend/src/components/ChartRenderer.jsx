@@ -214,6 +214,182 @@ const ChartRenderer = ({ data, analysisResults }) => {
     }
   };
 
+  // Render AI-generated charts based on backend specifications
+  const renderAIGeneratedChart = (chartSpec, index) => {
+    if (!data || !chartSpec.config) {
+      return <div className="text-center text-gray-500">No data available for chart</div>;
+    }
+
+    const colors = CHART_COLORS.primary;
+    const color = colors[index % colors.length];
+
+    // Prepare data based on chart configuration
+    const prepareChartData = () => {
+      const config = chartSpec.config;
+      
+      if (chartSpec.type === 'pie') {
+        // For pie charts, group data by category and sum values
+        const categoryKey = config.nameKey;
+        const valueKey = config.dataKey;
+        
+        if (!categoryKey || !valueKey) return [];
+        
+        const grouped = data.reduce((acc, item) => {
+          const category = item[categoryKey];
+          const value = parseFloat(item[valueKey]) || 0;
+          
+          if (acc[category]) {
+            acc[category] += value;
+          } else {
+            acc[category] = value;
+          }
+          
+          return acc;
+        }, {});
+        
+        return Object.entries(grouped).map(([name, value]) => ({ name, value }));
+      } else {
+        // For other chart types, use data directly with proper key mapping
+        return data.map(item => {
+          const result = { ...item };
+          
+          // Convert numeric values
+          if (config.yAxis?.dataKey) {
+            const value = parseFloat(item[config.yAxis.dataKey]);
+            result[config.yAxis.dataKey] = isNaN(value) ? 0 : value;
+          }
+          
+          return result;
+        }).slice(0, 50); // Limit to 50 data points for performance
+      }
+    };
+
+    const chartData = prepareChartData();
+    const config = chartSpec.config;
+
+    // Render different chart types
+    switch (chartSpec.type) {
+      case 'line':
+        return (
+          <LineChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+            <XAxis 
+              dataKey={config.xAxis?.dataKey} 
+              tick={{ fontSize: 12 }}
+              angle={-45}
+              textAnchor="end"
+              height={60}
+            />
+            <YAxis tick={{ fontSize: 12 }} />
+            <Tooltip />
+            <Legend />
+            <Line 
+              type="monotone" 
+              dataKey={config.yAxis?.dataKey} 
+              stroke={color}
+              strokeWidth={2}
+              dot={{ r: 3 }}
+              activeDot={{ r: 5 }}
+            />
+          </LineChart>
+        );
+
+      case 'bar':
+        return (
+          <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+            <XAxis 
+              dataKey={config.xAxis?.dataKey} 
+              tick={{ fontSize: 12 }}
+              angle={-45}
+              textAnchor="end"
+              height={60}
+            />
+            <YAxis tick={{ fontSize: 12 }} />
+            <Tooltip />
+            <Legend />
+            <Bar 
+              dataKey={config.yAxis?.dataKey} 
+              fill={color}
+              radius={[4, 4, 0, 0]}
+            />
+          </BarChart>
+        );
+
+      case 'area':
+        return (
+          <AreaChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+            <XAxis 
+              dataKey={config.xAxis?.dataKey} 
+              tick={{ fontSize: 12 }}
+              angle={-45}
+              textAnchor="end"
+              height={60}
+            />
+            <YAxis tick={{ fontSize: 12 }} />
+            <Tooltip />
+            <Legend />
+            <Area 
+              type="monotone" 
+              dataKey={config.yAxis?.dataKey} 
+              stroke={color}
+              fill={color}
+              fillOpacity={0.6}
+            />
+          </AreaChart>
+        );
+
+      case 'pie':
+        return (
+          <PieChart>
+            <Pie
+              data={chartData}
+              cx="50%"
+              cy="50%"
+              outerRadius={80}
+              fill="#8884d8"
+              dataKey="value"
+              label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+            >
+              {chartData.map((entry, idx) => (
+                <Cell key={`cell-${idx}`} fill={colors[idx % colors.length]} />
+              ))}
+            </Pie>
+            <Tooltip />
+            <Legend />
+          </PieChart>
+        );
+
+      case 'scatter':
+        return (
+          <ScatterChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+            <XAxis 
+              type="number" 
+              dataKey={config.xAxis?.dataKey} 
+              tick={{ fontSize: 12 }}
+            />
+            <YAxis 
+              type="number" 
+              dataKey={config.yAxis?.dataKey} 
+              tick={{ fontSize: 12 }}
+            />
+            <Tooltip cursor={{ strokeDasharray: '3 3' }} />
+            <Scatter dataKey={config.yAxis?.dataKey} fill={color} />
+          </ScatterChart>
+        );
+
+      default:
+        return (
+          <div className="text-center text-gray-500 py-8">
+            <BarChart3 className="w-12 h-12 mx-auto mb-4 opacity-50" />
+            <p>Chart type "{chartSpec.type}" not supported</p>
+          </div>
+        );
+    }
+  };
+
   // Export chart data
   const exportData = () => {
     if (!processedData) return;
@@ -364,14 +540,7 @@ const ChartRenderer = ({ data, analysisResults }) => {
               
               <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
-                  {/* Render AI-recommended charts */}
-                  <BarChart data={chart.data}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip />
-                    <Bar dataKey="value" fill={CHART_COLORS.primary[index % CHART_COLORS.primary.length]} />
-                  </BarChart>
+                  {renderAIGeneratedChart(chart, index)}
                 </ResponsiveContainer>
               </div>
             </div>

@@ -22,6 +22,19 @@ function App() {
   const [currentSession, setCurrentSession] = useState(null);
   const [csvData, setCsvData] = useState(null);
   const [analysisResults, setAnalysisResults] = useState(null);
+  
+  // Debug analysisResults state changes
+  useEffect(() => {
+    console.log('🔄 analysisResults state changed:', analysisResults);
+    if (analysisResults) {
+      console.log('📊 Analysis results structure:', {
+        hasKeyInsights: !!analysisResults.key_insights,
+        hasRecommendations: !!analysisResults.recommendations,
+        hasSuccess: !!analysisResults.success,
+        keys: Object.keys(analysisResults)
+      });
+    }
+  }, [analysisResults]);
   const [systemStatus, setSystemStatus] = useState({
     backend: false,
     supabase: false,
@@ -102,6 +115,9 @@ function App() {
     setCurrentSession(sessionId);
     setAnalysisResults(null);
 
+    // Subscribe to session room for real-time updates
+    webSocket.subscribeToSession(sessionId);
+
     // Start analysis via WebSocket
     webSocket.startAnalysis({
       csvData: csvData.raw,
@@ -115,9 +131,17 @@ function App() {
   // Handle analysis completion
   useEffect(() => {
     const handleAnalysisComplete = (data) => {
+      console.log('🎉 Analysis completed event received:', data);
+      console.log('📊 Current session:', currentSession);
+      console.log('📋 Data session_id:', data.session_id);
+      console.log('📄 Result data:', data.result);
+      
       if (data.session_id === currentSession) {
+        console.log('✅ Session IDs match, setting analysis results');
         setAnalysisResults(data.result);
-        console.log('Analysis completed:', data);
+        console.log('📈 Analysis results set:', data.result);
+      } else {
+        console.log('❌ Session ID mismatch, ignoring result');
       }
     };
 

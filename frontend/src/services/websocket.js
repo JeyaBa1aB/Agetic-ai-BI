@@ -23,8 +23,15 @@ class WebSocketService {
 
     this.socket = io(url, {
       transports: ['websocket', 'polling'],
-      timeout: 20000,
+      timeout: 60000,  // Increased to 60 seconds for long-running analysis
       forceNew: true,
+      reconnection: true,
+      reconnectionAttempts: 10,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+      maxHttpBufferSize: 1e8,  // 100MB for large data transfers
+      pingTimeout: 60000,      // 60 seconds ping timeout
+      pingInterval: 25000      // 25 seconds ping interval
     });
 
     this.setupEventHandlers();

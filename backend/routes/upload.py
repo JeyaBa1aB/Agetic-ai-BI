@@ -115,7 +115,9 @@ def upload_file():
             if not is_valid:
                 return jsonify({
                     'success': False,
-                    'error': validation_result
+                    'valid': False,
+                    'error': validation_result,
+                    'message': validation_result
                 }), 400
             
             # Read file content for processing
@@ -188,13 +190,17 @@ def validate_csv_data():
             if not is_valid:
                 return jsonify({
                     'success': False,
-                    'error': validation_result
+                    'valid': False,
+                    'error': validation_result,
+                    'message': validation_result
                 }), 400
             
             return jsonify({
                 'success': True,
+                'valid': True,
                 'message': 'CSV data is valid',
-                'validation_info': validation_result
+                'details': validation_result,
+                'validation_info': validation_result  # Keep for backward compatibility
             })
             
         except Exception as e:
