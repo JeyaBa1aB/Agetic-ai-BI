@@ -25,17 +25,7 @@ const ConnectionStatus = ({ systemStatus, websocketStatus, error }) => {
         color: 'text-red-600'
       });
     }
-    
-    if (!systemStatus.supabase) {
-      details.push({
-        service: 'Database',
-        status: 'disconnected', 
-        message: 'Supabase database connection failed',
-        icon: XCircle,
-        color: 'text-red-600'
-      });
-    }
-    
+
     if (!systemStatus.websocket) {
       details.push({
         service: 'Real-time Updates',
@@ -116,7 +106,6 @@ const ConnectionStatus = ({ systemStatus, websocketStatus, error }) => {
               <ul className="text-sm text-blue-800 space-y-1">
                 <li>• Make sure the backend server is running on port 5000</li>
                 <li>• Check your internet connection</li>
-                <li>• Verify Supabase configuration in environment variables</li>
                 <li>• Try refreshing the page to reconnect</li>
               </ul>
             </div>

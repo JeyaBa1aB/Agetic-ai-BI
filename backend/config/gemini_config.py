@@ -17,7 +17,7 @@ class GeminiConfig:
     _is_configured = False
     
     # Default model configuration
-    DEFAULT_MODEL = "gemini-1.5-flash"
+    DEFAULT_MODEL = "gemini-2.5-flash"
     DEFAULT_TEMPERATURE = 0.7
     DEFAULT_MAX_OUTPUT_TOKENS = 2048
     DEFAULT_TOP_P = 0.8

@@ -335,7 +335,10 @@ This analysis provides a solid foundation for informed decision-making."""
     
     def _create_offline_llm(self):
         """Create a completely offline LLM that doesn't use any external services"""
-        from langchain.llms.base import LLM
+        try:
+            from langchain.llms.base import LLM
+        except ImportError:
+            from langchain_core.language_models.llms import LLM
         from typing import Optional, List, Any
         
         class OfflineLLM(LLM):
@@ -1046,7 +1049,10 @@ This analysis provides a solid foundation for informed decision-making."""
             logger.warning(f"Failed to create mock ChatOpenAI: {e}, falling back to SimpleLLM")
             
             # Final fallback to SimpleLLM
-            from langchain.llms.base import LLM
+            try:
+                from langchain.llms.base import LLM
+            except ImportError:
+                from langchain_core.language_models.llms import LLM
             from typing import Optional, List, Any
             
             class SimpleLLM(LLM):

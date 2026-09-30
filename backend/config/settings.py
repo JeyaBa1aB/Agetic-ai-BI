@@ -13,7 +13,7 @@ class Config:
     # Flask Configuration
     SECRET_KEY = os.getenv('SECRET_KEY', 'your-secret-key-change-in-production')
     FLASK_ENV = os.getenv('FLASK_ENV', 'development')
-    FLASK_DEBUG = os.getenv('FLASK_DEBUG', 'True').lower() == 'true'
+    FLASK_DEBUG = os.getenv('FLASK_DEBUG', 'False').lower() == 'true'
     
     # Server Configuration
     HOST = os.getenv('HOST', '0.0.0.0')
@@ -24,12 +24,7 @@ class Config:
     
     # AI Configuration
     GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
-    
-    # Supabase Configuration
-    SUPABASE_URL = os.getenv('SUPABASE_URL')
-    SUPABASE_KEY = os.getenv('SUPABASE_KEY')
-    SUPABASE_SERVICE_ROLE_KEY = os.getenv('SUPABASE_SERVICE_ROLE_KEY')
-    
+
     # Multi-Agent Configuration
     MAX_AGENTS = int(os.getenv('MAX_AGENTS', 9))
     AGENT_TIMEOUT = int(os.getenv('AGENT_TIMEOUT', 30))
@@ -49,14 +44,12 @@ class Config:
         """Validate that all required configuration is present"""
         required_vars = [
             'SECRET_KEY',
-            'GEMINI_API_KEY',
-            'SUPABASE_URL',
-            'SUPABASE_KEY'
+            'GEMINI_API_KEY'
         ]
-        
+
         missing_vars = []
         for var in required_vars:
-            if not getattr(cls, var) or getattr(cls, var) in ['your_gemini_api_key_here', 'your_supabase_project_url_here', 'your_supabase_anon_key_here']:
+            if not getattr(cls, var) or getattr(cls, var) in ['your_gemini_api_key_here']:
                 missing_vars.append(var)
         
         if missing_vars:
@@ -80,8 +73,5 @@ class Config:
             'allowed_extensions': cls.ALLOWED_EXTENSIONS,
             'csv_encoding': cls.CSV_ENCODING,
             'log_level': cls.LOG_LEVEL,
-            'gemini_api_configured': bool(cls.GEMINI_API_KEY and cls.GEMINI_API_KEY != 'your_gemini_api_key_here'),
-            'supabase_configured': bool(cls.SUPABASE_URL and cls.SUPABASE_KEY and 
-                                      cls.SUPABASE_URL != 'your_supabase_project_url_here' and 
-                                      cls.SUPABASE_KEY != 'your_supabase_anon_key_here')
+            'gemini_api_configured': bool(cls.GEMINI_API_KEY and cls.GEMINI_API_KEY != 'your_gemini_api_key_here')
         }

@@ -3,7 +3,7 @@
  * Displays system status and navigation
  */
 import React from 'react';
-import { Activity, Database, Wifi, WifiOff } from 'lucide-react';
+import { Activity, Wifi, WifiOff } from 'lucide-react';
 
 const Header = ({ systemStatus }) => {
   const getStatusIcon = (status) => {
@@ -46,13 +46,6 @@ const Header = ({ systemStatus }) => {
               <Activity className={`w-4 h-4 ${getStatusColor(systemStatus.backend)}`} />
               <span className="text-sm font-medium text-gray-700">Backend</span>
               {getStatusIcon(systemStatus.backend)}
-            </div>
-
-            {/* Database Status */}
-            <div className="flex items-center space-x-2">
-              <Database className={`w-4 h-4 ${getStatusColor(systemStatus.supabase)}`} />
-              <span className="text-sm font-medium text-gray-700">Database</span>
-              {getStatusIcon(systemStatus.supabase)}
             </div>
 
             {/* WebSocket Status */}

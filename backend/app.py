@@ -1,3 +1,18 @@
+import eventlet
+
+# Must run before any other imports bind sockets/threads — required for the
+# eventlet gunicorn worker that serves Flask-SocketIO in production
+eventlet.monkey_patch()
+
+import sys
+
+# Windows consoles default to cp1252, which crashes on emoji in prints (via crewai's stdout wrapper)
+try:
+    sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+    sys.stderr.reconfigure(encoding='utf-8', errors='replace')
+except (AttributeError, OSError):
+    pass
+
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from flask_socketio import SocketIO, emit
@@ -8,11 +23,13 @@ from dotenv import load_dotenv
 
 # Import configuration modules
 from config.settings import Config
-from config.supabase_config import SupabaseConfig, SupabaseService
 from config.gemini_config import GeminiConfig, GeminiService
 
 # Load environment variables
 load_dotenv()
+
+# Debug mode is opt-in via FLASK_DEBUG=true; production default
+debug = os.getenv('FLASK_DEBUG', 'False').lower() == 'true'
 
 # Configure logging
 logging.basicConfig(
@@ -34,24 +51,14 @@ CORS(app, origins=cors_origins)
 
 # Initialize SocketIO for real-time communication with extended timeouts for long-running analysis
 socketio = SocketIO(
-    app, 
+    app,
     cors_allowed_origins=cors_origins,
     ping_timeout=60,      # 60 seconds ping timeout
     ping_interval=25,     # 25 seconds ping interval
     max_http_buffer_size=100000000,  # 100MB for large data transfers
-    logger=True,
-    engineio_logger=True
+    logger=debug,
+    engineio_logger=debug
 )
-
-# Initialize Supabase
-try:
-    supabase_client = SupabaseConfig.init_supabase()
-    supabase_service = SupabaseService()
-    logger.info("Supabase initialized successfully")
-except Exception as e:
-    logger.error(f"Supabase initialization failed: {e}")
-    supabase_client = None
-    supabase_service = None
 
 # Initialize Gemini AI
 try:
@@ -65,16 +72,11 @@ except Exception as e:
 
 # Import and register blueprints
 from routes.upload import upload_bp
-from routes.analysis import analysis_bp, init_analysis_services
 from routes.agents import agents_bp
 from routes.crewai_routes import crewai_bp
 
-# Initialize analysis services
-init_analysis_services(supabase_service, gemini_service)
-
 # Register blueprints
 app.register_blueprint(upload_bp, url_prefix='/api/upload')
-app.register_blueprint(analysis_bp, url_prefix='/api/analysis')
 app.register_blueprint(agents_bp, url_prefix='/api/agents')
 app.register_blueprint(crewai_bp, url_prefix='/api/crewai')
 
@@ -87,7 +89,6 @@ def health_check():
     return jsonify({
         'status': 'healthy',
         'message': 'Multi-Agent BI Assistant Backend is running',
-        'supabase_connected': supabase_client is not None,
         'gemini_connected': gemini_model is not None,
         'config': Config.get_config_summary()
     })
@@ -100,7 +101,6 @@ def get_config():
         return jsonify({
             'status': 'success',
             'config': Config.get_config_summary(),
-            'supabase_connected': supabase_client is not None,
             'gemini_connected': gemini_model is not None
         })
     except Exception as e:
@@ -115,22 +115,15 @@ def get_config():
 def config_status():
     """Get configuration status for debugging"""
     try:
-        # Test Supabase connection if available
-        supabase_status = False
-        if supabase_service:
-            supabase_status = SupabaseConfig.test_connection()
-        
         # Test Gemini AI connection if available
         gemini_status = False
         gemini_response = None
         if gemini_service:
             gemini_status, gemini_response = GeminiConfig.test_connection()
-        
+
         return jsonify({
             'status': 'success',
             'config': Config.get_config_summary(),
-            'supabase_initialized': supabase_client is not None,
-            'supabase_connection_test': supabase_status,
             'gemini_initialized': gemini_model is not None,
             'gemini_connection_test': gemini_status,
             'gemini_test_response': gemini_response[:100] + '...' if gemini_response and len(gemini_response) > 100 else gemini_response
@@ -298,7 +291,6 @@ if __name__ == '__main__':
     # Get server configuration from environment
     host = os.getenv('HOST', '0.0.0.0')
     port = int(os.getenv('PORT', 5000))
-    debug = os.getenv('FLASK_DEBUG', 'True').lower() == 'true'
     
     logger.info(f'Starting Multi-Agent BI Assistant server on {host}:{port}')
     logger.info(f'Debug mode: {debug}')

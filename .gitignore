@@ -1,0 +1,19 @@
+# Python
+backend/venv/
+__pycache__/
+*.pyc
+backend/temp/
+
+# Env / secrets
+.env
+!*.env.example
+
+# Node
+node_modules/
+frontend/dist/
+
+# IDE / OS
+.qoder/
+.vscode/
+.DS_Store
+Thumbs.db

@@ -149,62 +149,6 @@ def get_agent_info(agent_id):
             'error': f'Failed to get agent info: {str(e)}'
         }), 500
 
-@agents_bp.route('/test/<agent_id>', methods=['POST'])
-def test_agent(agent_id):
-    """Test a specific agent with a sample query"""
-    try:
-        if agent_id not in AGENT_TYPES:
-            return jsonify({
-                'success': False,
-                'error': 'Agent not found'
-            }), 404
-        
-        data = request.get_json()
-        test_query = data.get('query', 'Hello! Please introduce yourself and your capabilities.')
-        
-        # Get agent service
-        try:
-            agent_service, system_instruction = AgentGeminiConfig.get_agent_service(agent_id)
-            
-            if not agent_service:
-                return jsonify({
-                    'success': False,
-                    'error': 'Failed to initialize agent service'
-                }), 500
-            
-            # Generate response with system instruction
-            full_prompt = f"{system_instruction}\n\nUser Query: {test_query}"
-            result = agent_service.generate_content(full_prompt)
-            
-            if result['success']:
-                return jsonify({
-                    'success': True,
-                    'agent_id': agent_id,
-                    'agent_name': AGENT_TYPES[agent_id]['name'],
-                    'query': test_query,
-                    'response': result['content'],
-                    'usage': result.get('usage'),
-                    'system_instruction': system_instruction
-                })
-            else:
-                return jsonify({
-                    'success': False,
-                    'error': f'Agent test failed: {result["error"]}'
-                }), 500
-                
-        except Exception as e:
-            return jsonify({
-                'success': False,
-                'error': f'Agent service error: {str(e)}'
-            }), 500
-            
-    except Exception as e:
-        logger.error(f"Error testing agent {agent_id}: {e}")
-        return jsonify({
-            'success': False,
-            'error': f'Agent test failed: {str(e)}'
-        }), 500
-
 @agents_bp.route('/status', methods=['GET'])
 def get_agents_status():
     """Get status of all agents"""

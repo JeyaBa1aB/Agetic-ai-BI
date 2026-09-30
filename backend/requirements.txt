@@ -3,6 +3,10 @@ Flask==2.3.2
 Flask-CORS==4.0.0
 Flask-SocketIO==5.3.4
 
+# Production Server (eventlet worker required for Flask-SocketIO)
+gunicorn
+eventlet
+
 # Environment Configuration
 python-dotenv==1.0.0
 
@@ -11,11 +15,9 @@ crewai
 
 # LLM Integration
 litellm
+langchain
 langchain-google-genai
 langchain-openai
-
-# Supabase Database
-supabase
 
 # Data Processing
 pandas

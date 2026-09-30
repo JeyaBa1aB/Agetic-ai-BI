@@ -6,7 +6,6 @@ import React, { useState, useEffect } from 'react';
 import { Toaster } from 'react-hot-toast';
 import useWebSocket from './hooks/useWebSocket';
 import { checkHealth, getConfig } from './services/api';
-import { supabaseService } from './services/supabase';
 
 // Import components (we'll create these next)
 import Header from './components/Header';
@@ -22,22 +21,8 @@ function App() {
   const [currentSession, setCurrentSession] = useState(null);
   const [csvData, setCsvData] = useState(null);
   const [analysisResults, setAnalysisResults] = useState(null);
-  
-  // Debug analysisResults state changes
-  useEffect(() => {
-    console.log('🔄 analysisResults state changed:', analysisResults);
-    if (analysisResults) {
-      console.log('📊 Analysis results structure:', {
-        hasKeyInsights: !!analysisResults.key_insights,
-        hasRecommendations: !!analysisResults.recommendations,
-        hasSuccess: !!analysisResults.success,
-        keys: Object.keys(analysisResults)
-      });
-    }
-  }, [analysisResults]);
   const [systemStatus, setSystemStatus] = useState({
     backend: false,
-    supabase: false,
     websocket: false
   });
   const [loading, setLoading] = useState(true);
@@ -55,14 +40,13 @@ function App() {
         const healthResponse = await checkHealth();
         const backendHealthy = healthResponse.status === 'healthy';
 
-        // Check Supabase connection
-        const supabaseHealthy = await supabaseService.testConnection();
-
-        setSystemStatus({
-          backend: backendHealthy,
-          supabase: supabaseHealthy,
-          websocket: webSocket.isConnected
-        });
+        // Preserve the current websocket value — it is owned by the
+        // isConnected effect below, which would otherwise be clobbered
+        // here by this effect's stale mount-time closure after the await.
+        setSystemStatus(prev => ({
+          ...prev,
+          backend: backendHealthy
+        }));
 
         if (backendHealthy) {
           // Get system configuration
@@ -79,7 +63,6 @@ function App() {
         setError('Failed to connect to backend services');
         setSystemStatus({
           backend: false,
-          supabase: false,
           websocket: false
         });
       } finally {
