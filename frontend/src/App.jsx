@@ -21,6 +21,7 @@ function App() {
   const [currentSession, setCurrentSession] = useState(null);
   const [csvData, setCsvData] = useState(null);
   const [analysisResults, setAnalysisResults] = useState(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [systemStatus, setSystemStatus] = useState({
     backend: false,
     websocket: false
@@ -97,6 +98,7 @@ function App() {
 
     setCurrentSession(sessionId);
     setAnalysisResults(null);
+    setIsAnalyzing(true);
 
     // Subscribe to session room for real-time updates
     webSocket.subscribeToSession(sessionId);
@@ -122,6 +124,7 @@ function App() {
       if (data.session_id === currentSession) {
         console.log('✅ Session IDs match, setting analysis results');
         setAnalysisResults(data.result);
+        setIsAnalyzing(false);
         console.log('📈 Analysis results set:', data.result);
       } else {
         console.log('❌ Session ID mismatch, ignoring result');
@@ -131,6 +134,7 @@ function App() {
     const handleAnalysisError = (data) => {
       if (data.session_id === currentSession) {
         setError(`Analysis failed: ${data.error}`);
+        setIsAnalyzing(false);
         console.error('Analysis error:', data);
       }
     };
@@ -230,8 +234,10 @@ function App() {
               <h2 className="text-lg font-semibold text-gray-900 mb-4">
                 💬 Analysis Query
               </h2>
-              <ChatInterface 
+              <ChatInterface
                 onAnalysisStart={handleAnalysisStart}
+                onAnalysisStop={() => setIsAnalyzing(false)}
+                isAnalyzing={isAnalyzing}
                 disabled={!csvData || !systemStatus.backend}
                 currentSession={currentSession}
               />

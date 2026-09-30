@@ -1250,8 +1250,7 @@ This analysis provides a foundation for strategic business decisions and operati
                     'agent_status': agent_status,
                     'workflow_stage': 'initialization'
                 }
-                socketio.emit('analysis_started', analysis_data)  # General broadcast
-                socketio.emit('analysis_started', analysis_data, room=session_id)  # Session room
+                socketio.emit('analysis_started', analysis_data, room=session_id)
                 
                 # Emit individual agent status updates only for selected agents
                 for agent_id in selected_agent_ids:
@@ -1292,8 +1291,7 @@ This analysis provides a foundation for strategic business decisions and operati
                     'result': formatted_result,
                     'duration': time.time() - self.analysis_context['start_time']
                 }
-                socketio.emit('analysis_completed', completion_data)  # General broadcast
-                socketio.emit('analysis_completed', completion_data, room=session_id)  # Session room
+                socketio.emit('analysis_completed', completion_data, room=session_id)
             
             logger.info(f"CrewAI analysis completed for session {session_id}")
             return formatted_result

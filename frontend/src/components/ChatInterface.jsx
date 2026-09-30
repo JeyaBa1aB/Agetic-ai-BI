@@ -6,9 +6,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Send, MessageSquare, Loader, Sparkles } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-const ChatInterface = ({ onAnalysisStart, disabled, currentSession }) => {
+const ChatInterface = ({ onAnalysisStart, onAnalysisStop, isAnalyzing, disabled, currentSession }) => {
   const [query, setQuery] = useState('');
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [chatHistory, setChatHistory] = useState([]);
   const textareaRef = useRef(null);
   const chatContainerRef = useRef(null);
@@ -64,7 +63,6 @@ const ChatInterface = ({ onAnalysisStart, disabled, currentSession }) => {
     };
 
     setChatHistory(prev => [...prev, userMessage]);
-    setIsAnalyzing(true);
 
     // Start analysis
     onAnalysisStart(query, sessionId);
@@ -102,17 +100,9 @@ const ChatInterface = ({ onAnalysisStart, disabled, currentSession }) => {
 
   // Stop analysis
   const handleStopAnalysis = () => {
-    setIsAnalyzing(false);
+    onAnalysisStop();
     toast.info('Analysis stopped');
   };
-
-  // Listen for analysis completion
-  useEffect(() => {
-    if (currentSession && isAnalyzing) {
-      // This will be handled by the parent component
-      // We'll update this when we receive analysis results
-    }
-  }, [currentSession, isAnalyzing]);
 
   return (
     <div className="space-y-4">
