@@ -15,6 +15,7 @@ python-dotenv==1.0.0
 crewai
 
 # LLM Integration
+google-generativeai==0.8.6
 litellm
 langchain
 langchain-google-genai
