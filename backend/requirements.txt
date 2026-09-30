@@ -4,8 +4,9 @@ Flask-CORS==4.0.0
 Flask-SocketIO==5.3.4
 
 # Production Server (eventlet worker required for Flask-SocketIO)
-gunicorn
-eventlet
+# gunicorn 26 removed the built-in eventlet worker — do not upgrade past 23.x
+gunicorn==23.0.0
+eventlet==0.41.2
 
 # Environment Configuration
 python-dotenv==1.0.0
